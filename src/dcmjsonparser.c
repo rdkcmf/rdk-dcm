@@ -103,7 +103,7 @@ void processSSHWhiteList(cJSON *sshFeature)
 void main(int argc, char **argv)
 {
     char *data = NULL,*dcmResponse = NULL;
-    cJSON *paramObj = NULL, *childObj = NULL,*json=NULL,*configData=NULL;
+    cJSON *paramObj = NULL, *childObj = NULL,*json=NULL,*configData=NULL,*effectiveImmediate=NULL;
     FILE *fileRead = NULL,*fileWrite =NULL;
     
     char keyValue[512]={'\0'};
@@ -213,6 +213,19 @@ void main(int argc, char **argv)
                                 processSSHWhiteList(subitem);
                             }
                         }
+
+                        effectiveImmediate = cJSON_GetObjectItem( subitem, "effectiveImmediate" );
+                        int effectiveImmediatevalue;
+                        if(effectiveImmediate !=NULL)
+                        {
+                                effectiveImmediatevalue=effectiveImmediate->valueint;
+                                printf("dcmjsonparser: effectiveImmediate is %d\n",effectiveImmediatevalue);
+                        }
+                        else
+                        {
+                                printf("dcmjsonparser: featureControl.features.effectiveImmediate object is not present\n");
+                        }
+
                         configData = cJSON_GetObjectItem( subitem, "configData" );
                         if(configData !=NULL)
                         {
@@ -225,7 +238,8 @@ void main(int argc, char **argv)
                                 printf("dcmjsonparser: value is %s\n",configValue); 
                                 if(strncmp(configKey,"tr181.",6)==0)
                                 {
-                                    sprintf(keyValue, "%s:%s\n", configKey,configValue );
+                                    /* #~ is used to seperate configKey,configValue,effectiveImmediatevalue which can used as delimiter to cut these values respectively.*/
+                                    sprintf(keyValue, "%s#~%s#~%d\n", configKey,configValue,effectiveImmediatevalue );
                                     printf("dcmjsonparser: keyValue format is %s\n",keyValue);
                                     fwrite(keyValue, strlen(keyValue), 1, fileWrite);
                                 }
