@@ -17,6 +17,11 @@
  * limitations under the License.
 */
 
+/**
+*@file dcmjsonparser.c
+*
+*@brief Types and APIs exposed by dcm.
+*/
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -24,9 +29,44 @@
 #include <cJSON.h>
 #include <errno.h>
 
-#define RFC_CONFIG_DATA "/tmp/rfc_configdata.txt"
-#define RFC_SSH_CONFIG_DATA "/tmp/RFC/.RFC_SSHWhiteList.list"
+/**
+ * @defgroup DCM  DCM (Device Configuration Management)
+ *
+ * - This component parses Device Configuration Management JSON responses.
+ *
+ * @image html DCM.png
+ * @defgroup DCM_API DCM Public APIs
+ * @ingroup DCM
+ *
+ * @defgroup DCM_TYPES DCM Data Types
+ * Data types defined for RFC(Remote Feature Control).
+ * @ingroup  DCM
+ */
 
+/**
+ * @addtogroup DCM_TYPES
+ * @{
+ */
+
+#define RFC_CONFIG_DATA "/tmp/rfc_configdata.txt" //!<  Contains Configured data’s that are parsed to the client.
+#define RFC_SSH_CONFIG_DATA "/tmp/RFC/.RFC_SSHWhiteList.list" //!< Contains the list of IPs obtained from RFC feature control at startup.
+/**
+ * @}
+ */
+
+
+/**
+ * @addtogroup DCM_API
+ * @{
+ */
+
+/**
+ * @brief This function takes a cJSON node as argument and verifies whether the supplied argument is an node array.
+ *
+ * @param[in] item      item to know its type.
+ *
+ * @retval Returns 1 if the supplied item is an array kind otherwise returns 0.
+ */
 int isNodeArrayType(cJSON * const item)
 {
     if (item == NULL)
@@ -37,6 +77,14 @@ int isNodeArrayType(cJSON * const item)
     return (item->type & 0xFF) == cJSON_Array;
 }
 
+/**
+ * @brief This function writes the parsed JSON information to a file.
+ *
+ * @param[in] arrayNode     JSON array.
+ * @param[in] filename      Name of the file where parsed data will be stored.
+ *
+ * @ret returns status(0/1).
+ */
 int saveToFile(cJSON * arrayNode, const char* filename)
 {
     printf("dcmjsonparser: Entering %s\n", __FUNCTION__);
@@ -64,6 +112,13 @@ int saveToFile(cJSON * arrayNode, const char* filename)
     return status;
 }
 
+/**
+ * @brief This function traverses through the cJSON node list and returns the next node that is an Array.
+ *
+ * @param[in] node JSON response from SSH whitelist.
+ *
+ * @ret returns  JSON array.
+ */
 cJSON* getArrayNode(cJSON *node)
 {
         cJSON * arrayNode = NULL;
@@ -89,6 +144,23 @@ cJSON* getArrayNode(cJSON *node)
         return arrayNode;
 }
 
+/**
+ * @brief This function processes IP and MAC lists configured in the feature list.
+ *
+ * -Example:
+ *  {
+ *              "name":"SNMPWhitelist",
+ *              "effectiveImmediate":false,
+ *              "enable":true,
+ *              "configData":{},
+ *              "listType":"IPv4",
+ *              "listSize":5,
+ *              "SNMP IP4 WL":["178.62.43.255","128.82.34.17","192.168.1.80","192.168.1.1/24","10.0.0.32/6"]
+ *              },
+ *
+ * @param[in] sshFeature  Contains JSON values like List type and list size
+ *
+ */
 void processSSHWhiteList(cJSON *sshFeature)
 {
     printf("dcmjsonparser: Entering %s\n", __FUNCTION__);
@@ -100,16 +172,42 @@ void processSSHWhiteList(cJSON *sshFeature)
     }
 }
 
+/**
+ * @brief This function parses dcm JSON information and save it to a file.
+ *
+ * JSON will contain these information Feature control information like effectiveImmediate,configData.
+ * - Example:In this main function "featureControl" JSON is created with features in KeyValue format.
+ *
+ *   FeatureControl
+ *   {
+ *    "features": [
+ *     {
+ *       "name": "<feature name>",
+ *       "effectiveImmediate": true,
+ *       "enable": true,
+ *       "configData": {
+         <Parameter to configure>
+ *     }
+ *       "listType": "B8:27:EB:50:C1:CF",
+ *       "listSize": 1,
+ *       "RDK_RPI": [
+ *       "B8:27:EB:50:C1:FC"
+ *       ]
+ *    }
+ *   ]
+ *   }
+ *
+ */
 void main(int argc, char **argv)
 {
     char *data = NULL,*dcmResponse = NULL;
     cJSON *paramObj = NULL, *childObj = NULL,*json=NULL,*configData=NULL,*effectiveImmediate=NULL;
     FILE *fileRead = NULL,*fileWrite =NULL;
-    
+
     char keyValue[512]={'\0'};
     long len;
     int i;
-    
+
     if(argc != 2)
     {
         printf("dcmjsonparser: Pass valid arguments \n");
@@ -117,7 +215,7 @@ void main(int argc, char **argv)
     }
     else
     {
-        dcmResponse = argv[1];  
+        dcmResponse = argv[1];
     }
     printf("dcmjsonparser: dcm response file name %s\n",dcmResponse);
     
@@ -255,10 +353,15 @@ void main(int argc, char **argv)
             }
             else
             {
-                printf("dcmjsonparser: featureControl object is not present\n");   
+                printf("dcmjsonparser: featureControl object is not present\n");
             }
-            fclose(fileWrite);  
-        } 
+            fclose(fileWrite);
+        }
         free(data);
     }
 }
+
+/**
+ * @} //End of Doxygen
+ */
+
