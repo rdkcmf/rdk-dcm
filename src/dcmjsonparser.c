@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <cJSON.h>
 #include <errno.h>
+#include <telemetry_busmessage_sender.h>
 
 /**
  * @defgroup DCM  DCM (Device Configuration Management)
@@ -240,6 +241,7 @@ void main(int argc, char **argv)
         if( !json ) 
         {
             printf( "dcmjsonparser: json parse error: [%s]\n", cJSON_GetErrorPtr() );
+            t2_event_d("SYS_INFO_WEBPA_Config_Corruption", 1);
         } 
         else 
         {
