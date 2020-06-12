@@ -218,6 +218,9 @@ void main(int argc, char **argv)
     {
         dcmResponse = argv[1];
     }
+
+    t2_init("dcm-parser");
+
     printf("dcmjsonparser: dcm response file name %s\n",dcmResponse);
     
     fileRead = fopen( dcmResponse, "r+" );    
