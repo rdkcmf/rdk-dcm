@@ -26,7 +26,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <cJSON.h>
+#include <cjson/cJSON.h>
 #include <errno.h>
 #include <telemetry_busmessage_sender.h>
 #include "safec_lib.h"
