@@ -19,4 +19,4 @@
 SUBDIRS =
 bin_PROGRAMS = dcmjsonparser
 dcmjsonparser_SOURCES = dcmjsonparser.c
-dcmjsonparser_LDFLAGS = -lm -lcjson
+dcmjsonparser_LDFLAGS = -ltelemetry_msgsender -lcjson -lm
