@@ -29,6 +29,8 @@
 #include <cJSON.h>
 #include <errno.h>
 #include <telemetry_busmessage_sender.h>
+#include "safec_lib.h"
+
 
 /**
  * @defgroup DCM  DCM (Device Configuration Management)
@@ -205,9 +207,10 @@ void main(int argc, char **argv)
     cJSON *paramObj = NULL, *childObj = NULL,*json=NULL,*configData=NULL,*effectiveImmediate=NULL;
     FILE *fileRead = NULL,*fileWrite =NULL;
 
-    char keyValue[512]={'\0'};
     long len;
     int i;
+    errno_t rc = -1;
+    int ind = -1;
 
     if(argc != 2)
     {
@@ -301,8 +304,7 @@ void main(int argc, char **argv)
                 {
                     int subitemSize = cJSON_GetArraySize( childObj );
                     printf("dcmjsonparser: features array size is %d\n",subitemSize);
-                    char *features = cJSON_PrintUnformatted( childObj );
-                    
+                    int length = strlen("sshwhitelist");
                     for( i = 0; i < subitemSize; i++ ) 
                     {
                         cJSON* subitem = cJSON_GetArrayItem( childObj, i );
@@ -310,7 +312,9 @@ void main(int argc, char **argv)
                         cJSON* listType =  cJSON_GetObjectItem(subitem, "listType");
                         if (featureName != NULL && listType != NULL)
                         {
-                            if(strcasecmp("sshwhitelist", featureName->valuestring) == 0 )
+                            rc = strcasecmp_s("sshwhitelist",length, featureName->valuestring, &ind);
+                            ERR_CHK(rc);
+                            if ((!ind) && (rc == EOK))
                             {
                                 printf("dcmjsonparser: SSHWhiteList feature found!!\n");
                                 processSSHWhiteList(subitem);
@@ -342,9 +346,7 @@ void main(int argc, char **argv)
                                 if(strncmp(configKey,"tr181.",6)==0)
                                 {
                                     /* #~ is used to seperate configKey,configValue,effectiveImmediatevalue which can used as delimiter to cut these values respectively.*/
-                                    sprintf(keyValue, "%s#~%s#~%d\n", configKey,configValue,effectiveImmediatevalue );
-                                    printf("dcmjsonparser: keyValue format is %s\n",keyValue);
-                                    fwrite(keyValue, strlen(keyValue), 1, fileWrite);
+                                    fprintf(fileWrite, "%s#~%s#~%d\n", configKey,configValue,effectiveImmediatevalue );
                                 }
                                 configObject = configObject->next;
                             }
