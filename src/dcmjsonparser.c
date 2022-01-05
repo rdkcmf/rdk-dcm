@@ -70,7 +70,7 @@
  *
  * @retval Returns 1 if the supplied item is an array kind otherwise returns 0.
  */
-int isNodeArrayType(cJSON * const item)
+static int isNodeArrayType(cJSON * const item)
 {
     if (item == NULL)
     {
@@ -88,7 +88,7 @@ int isNodeArrayType(cJSON * const item)
  *
  * @ret returns status(0/1).
  */
-int saveToFile(cJSON * arrayNode, const char* filename)
+static int saveToFile(cJSON * arrayNode, const char* filename)
 {
     printf("dcmjsonparser: Entering %s\n", __FUNCTION__);
     int status = 0;
@@ -122,7 +122,7 @@ int saveToFile(cJSON * arrayNode, const char* filename)
  *
  * @ret returns  JSON array.
  */
-cJSON* getArrayNode(cJSON *node)
+static cJSON* getArrayNode(cJSON *node)
 {
         cJSON * arrayNode = NULL;
         while(NULL != node)
@@ -164,7 +164,7 @@ cJSON* getArrayNode(cJSON *node)
  * @param[in] sshFeature  Contains JSON values like List type and list size
  *
  */
-void processSSHWhiteList(cJSON *sshFeature)
+static void processSSHWhiteList(cJSON *sshFeature)
 {
     printf("dcmjsonparser: Entering %s\n", __FUNCTION__);
     cJSON* childNode = getArrayNode(sshFeature);
